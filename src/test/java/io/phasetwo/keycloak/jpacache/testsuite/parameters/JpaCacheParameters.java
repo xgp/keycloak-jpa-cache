@@ -12,6 +12,8 @@ import io.phasetwo.keycloak.jpacache.userSession.JpaCacheUserSessionProviderFact
 import java.util.Set;
 import org.keycloak.authorization.jpa.store.JPAAuthorizationStoreFactory;
 import org.keycloak.broker.provider.IdentityProviderFactory;
+import org.keycloak.cache.DefaultLocalCacheProviderFactory;
+import org.keycloak.cache.LocalCacheSPI;
 import org.keycloak.connections.jpa.*;
 import org.keycloak.connections.jpa.entityprovider.JpaEntitySpi;
 import org.keycloak.connections.jpa.updater.JpaUpdaterProviderFactory;
@@ -50,6 +52,8 @@ import org.keycloak.services.clientregistration.policy.impl.*;
 import org.keycloak.sessions.AuthenticationSessionSpi;
 import org.keycloak.storage.DatastoreSpi;
 import org.keycloak.storage.datastore.DefaultDatastoreProviderFactory;
+import org.keycloak.tracing.NoopTracingProviderFactory;
+import org.keycloak.tracing.TracingSpi;
 import org.keycloak.userprofile.DeclarativeUserProfileProviderFactory;
 import org.keycloak.userprofile.UserProfileSpi;
 import org.keycloak.userprofile.validator.AttributeRequiredByMetadataValidator;
@@ -99,6 +103,9 @@ public class JpaCacheParameters extends KeycloakModelParameters {
           .add(UserSessionPersisterSpi.class)
           .add(UserProfileSpi.class)
           .add(ValidatorSPI.class)
+          .add(TracingSpi.class)
+          .add(IdentityProviderStorageSpi.class)
+          .add(LocalCacheSPI.class)
           .build();
 
   static final Set<Class<? extends ProviderFactory>> ALLOWED_FACTORIES =
@@ -111,6 +118,7 @@ public class JpaCacheParameters extends KeycloakModelParameters {
           .add(DefaultJpaConnectionProviderFactory.class)
           .add(DefaultPasswordPolicyManagerProviderFactory.class)
           .add(DeviceRepresentationProviderFactoryImpl.class)
+          .add(DefaultLocalCacheProviderFactory.class)
           .add(ForceExpiredPasswordPolicyProviderFactory.class)
           .add(GeneratedAesKeyProviderFactory.class)
           .add(GeneratedEcdsaKeyProviderFactory.class)
@@ -155,6 +163,9 @@ public class JpaCacheParameters extends KeycloakModelParameters {
           .add(TrustedHostClientRegistrationPolicyFactory.class)
           .add(DeclarativeUserProfileProviderFactory.class)
           .add(ValidatorFactory.class)
+          .add(NoopTracingProviderFactory.class)
+          .add(JpaIdentityProviderStorageProviderFactory.class)
+          .add(RegistrationWebOriginsPolicyFactory.class)
           .build();
 
   public JpaCacheParameters() {
@@ -168,6 +179,8 @@ public class JpaCacheParameters extends KeycloakModelParameters {
         .spi("clientScope")
         .defaultProvider("jpa")
         .spi("group")
+        .defaultProvider("jpa")
+        .spi("idp")
         .defaultProvider("jpa")
         .spi("role")
         .defaultProvider("jpa")

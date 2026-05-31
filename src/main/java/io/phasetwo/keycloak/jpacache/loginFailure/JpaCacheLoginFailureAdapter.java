@@ -58,6 +58,23 @@ public class JpaCacheLoginFailureAdapter implements UserLoginFailureModel {
   }
 
   @Override
+  public void clearPrimaryAndSecondaryAuthFailures() {
+    clearFailures();
+    entity.setNumSecondaryAuthFailures(null);
+  }
+
+  @Override
+  public int getNumSecondaryAuthFailures() {
+    Integer n = entity.getNumSecondaryAuthFailures();
+    return n == null ? 0 : n;
+  }
+
+  @Override
+  public void incrementSecondaryAuthFailures() {
+    entity.setNumSecondaryAuthFailures(getNumSecondaryAuthFailures() + 1);
+  }
+
+  @Override
   public long getLastFailure() {
     Long lastFailure = entity.getLastFailure();
     return lastFailure == null ? 0l : lastFailure;

@@ -45,4 +45,7 @@ public class LoginFailure {
 
   @Column(name = "NUM_TEMPORARY_LOCKOUTS")
   private Integer numTemporaryLockouts;
+
+  @Column(name = "NUM_SECONDARY_AUTH_FAILURES")
+  private Integer numSecondaryAuthFailures;
 }

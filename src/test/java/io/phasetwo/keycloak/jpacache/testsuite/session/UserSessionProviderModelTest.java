@@ -43,6 +43,8 @@ public class UserSessionProviderModelTest extends KeycloakModelTest {
   @Override
   public void createEnvironment(KeycloakSession s) {
     RealmModel realm = createRealm(s, "test");
+    s.getContext().setRealm(realm);
+
     realm.setOfflineSessionIdleTimeout(Constants.DEFAULT_OFFLINE_SESSION_IDLE_TIMEOUT);
     realm.setDefaultRole(
         s.roles().addRealmRole(realm, Constants.DEFAULT_ROLES_ROLE_PREFIX + "-" + realm.getName()));
@@ -60,6 +62,8 @@ public class UserSessionProviderModelTest extends KeycloakModelTest {
   @Override
   public void cleanEnvironment(KeycloakSession s) {
     RealmModel realm = s.realms().getRealm(realmId);
+    s.getContext().setRealm(realm);
+
     s.sessions().removeUserSessions(realm);
 
     UserModel user1 = s.users().getUserByUsername(realm, "user1");
@@ -1147,7 +1151,7 @@ public class UserSessionProviderModelTest extends KeycloakModelTest {
           s.sessions().createOfflineUserSession(session);
 
           UserSessionModel currentSession =
-              s.sessions().getOfflineUserSessionByBrokerSessionId(realm, "brokerSession");
+              s.sessions().getUserSessionByBrokerSessionId(realm, "brokerSession");
           assertThat(currentSession.getBrokerSessionId(), is("brokerSession"));
           assertThat(currentSession.getBrokerUserId(), is("brokerUserId"));
 

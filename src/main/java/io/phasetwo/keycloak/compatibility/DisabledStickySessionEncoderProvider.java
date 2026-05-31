@@ -42,7 +42,7 @@ public class DisabledStickySessionEncoderProvider
   }
 
   @Override
-  public String encodeSessionId(String sessionId) {
+  public String encodeSessionId(String sessionId, String route) {
     return sessionId;
   }
 
@@ -52,9 +52,23 @@ public class DisabledStickySessionEncoderProvider
   }
 
   @Override
+  public String sessionIdRoute(String sessionId) {
+    return null;
+  }
+
+  @Override
+  public StickySessionEncoderProvider.SessionIdAndRoute decodeSessionIdAndRoute(
+      String encodedSessionId) {
+    return new SessionIdAndRoute(encodedSessionId, null);
+  }
+
+  @Override
   public boolean shouldAttachRoute() {
     return false;
   }
+
+  @Override
+  public void setShouldAttachRoute(boolean shouldAttachRoute) {}
 
   @Override
   public void init(Config.Scope config) {}

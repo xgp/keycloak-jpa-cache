@@ -115,10 +115,9 @@ public class JpaCacheUserSessionProvider implements UserSessionProvider {
 
   @Override
   public AuthenticatedClientSessionModel getClientSession(
-      UserSessionModel userSession, ClientModel client, String clientSessionId, boolean offline) {
+      UserSessionModel userSession, ClientModel client, boolean offline) {
     log.tracef(
-        "getClientSession(%s, %s, %s, %s)%s",
-        userSession, client, clientSessionId, offline, getShortStackTrace());
+        "getClientSession(%s, %s, %s)%s", userSession, client, offline, getShortStackTrace());
 
     if (userSession == null) {
       return null;
@@ -289,7 +288,7 @@ public class JpaCacheUserSessionProvider implements UserSessionProvider {
         "getUserSessionByBrokerUserIdStream(%s, %s)%s", realm, brokerUserId, getShortStackTrace());
 
     TypedQuery<UserSession> query =
-        entityManager.createNamedQuery("findUserSessionsByBrokerUserId", UserSession.class);
+        entityManager.createNamedQuery("findJpaCacheUserSessionsByBrokerUserId", UserSession.class);
     query.setParameter("realmId", realm.getId());
     query.setParameter("brokerUserId", brokerUserId);
     return query.getResultStream().map(entityToAdapterFunc((realm)));
@@ -301,12 +300,12 @@ public class JpaCacheUserSessionProvider implements UserSessionProvider {
     log.tracef(
         "getUserSessionByBrokerSessionId(%s, %s)%s", realm, brokerSessionId, getShortStackTrace());
 
-    TypedQuery<UserSession> query =
-        entityManager.createNamedQuery("findUserSessionsByBrokerSessionId", UserSession.class);
-    query.setParameter("realmId", realm.getId());
-    query.setParameter("brokerSessionId", brokerSessionId);
-    UserSession session = query.getSingleResult();
-    return session != null ? entityToAdapterFunc(realm).apply(session) : null;
+    return getUserSessionsByBrokerSessionId(realm, brokerSessionId)
+        .filter(s -> s.getOffline() == null || !s.getOffline())
+        .map(entityToAdapterFunc(realm))
+        .filter(Objects::nonNull)
+        .findFirst()
+        .orElse(null);
   }
 
   public Stream<UserSession> getUserSessionsByBrokerSessionId(
@@ -315,7 +314,7 @@ public class JpaCacheUserSessionProvider implements UserSessionProvider {
         "getUserSessionByBrokerSessionId(%s, %s)%s", realm, brokerSessionId, getShortStackTrace());
 
     TypedQuery<UserSession> query =
-        entityManager.createNamedQuery("findUserSessionsByBrokerSessionId", UserSession.class);
+        entityManager.createNamedQuery("findJpaCacheUserSessionsByBrokerSessionId", UserSession.class);
     query.setParameter("realmId", realm.getId());
     query.setParameter("brokerSessionId", brokerSessionId);
     return query.getResultStream();
@@ -542,7 +541,6 @@ public class JpaCacheUserSessionProvider implements UserSessionProvider {
     return getUserSessionsStream(realm, user).filter(s -> s.isOffline());
   }
 
-  @Override
   public UserSessionModel getOfflineUserSessionByBrokerSessionId(
       RealmModel realm, String brokerSessionId) {
     log.tracef(

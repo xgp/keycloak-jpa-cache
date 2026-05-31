@@ -41,6 +41,7 @@ public class UserSessionConcurrencyTest extends KeycloakModelTest {
   @Override
   public void createEnvironment(KeycloakSession s) {
     RealmModel realm = createRealm(s, "test");
+    s.getContext().setRealm(realm);
     realm.setDefaultRole(
         s.roles().addRealmRole(realm, Constants.DEFAULT_ROLES_ROLE_PREFIX + "-" + realm.getName()));
     realm.setSsoSessionIdleTimeout(1800);
@@ -133,6 +134,11 @@ public class UserSessionConcurrencyTest extends KeycloakModelTest {
         });
 
     inComittedTransaction(
-        (Consumer<KeycloakSession>) session -> session.realms().removeRealm(realmId));
+        (Consumer<KeycloakSession>)
+            session -> {
+              RealmModel realm = session.realms().getRealm(realmId);
+              session.getContext().setRealm(realm);
+              session.realms().removeRealm(realmId);
+            });
   }
 }

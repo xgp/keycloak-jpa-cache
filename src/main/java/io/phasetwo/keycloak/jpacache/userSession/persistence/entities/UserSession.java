@@ -42,11 +42,11 @@ import org.keycloak.models.UserSessionModel;
       name = "findUserSessionsByUserId2",
       query = "SELECT s FROM UserSession s WHERE s.realmId = :realmId AND s.userId = :userId AND s.expiration > :now"),
   @NamedQuery(
-      name = "findUserSessionsByBrokerSessionId",
+      name = "findJpaCacheUserSessionsByBrokerSessionId",
       query =
           "SELECT s FROM UserSession s WHERE s.realmId = :realmId AND s.brokerSessionId = :brokerSessionId"),
   @NamedQuery(
-      name = "findUserSessionsByBrokerUserId",
+      name = "findJpaCacheUserSessionsByBrokerUserId",
       query =
           "SELECT s FROM UserSession s WHERE s.realmId = :realmId AND s.brokerUserId = :brokerUserId"),
   @NamedQuery(

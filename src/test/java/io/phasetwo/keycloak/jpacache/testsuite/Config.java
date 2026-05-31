@@ -18,7 +18,6 @@ package io.phasetwo.keycloak.jpacache.testsuite;
 
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Properties;
 import java.util.function.BooleanSupplier;
 import java.util.stream.Collectors;
 import org.keycloak.Config.ConfigProvider;
@@ -31,8 +30,6 @@ import org.keycloak.common.util.SystemEnvProperties;
  * @author hmlnarik
  */
 public class Config implements ConfigProvider {
-
-  private final Properties systemProperties = new SystemEnvProperties();
 
   private final Map<String, String> defaultProperties = new HashMap<>();
   private final ThreadLocal<Map<String, String>> properties =
@@ -121,12 +118,19 @@ public class Config implements ConfigProvider {
     }
 
     @Override
-    public String get(String key, String defaultValue) {
-      String v = replaceProperties(getConfig().get(prefix + key));
+    public String get(String key) {
+      String fullKey = prefix + key;
+      String v = replaceProperties(getConfig().get(fullKey));
       if (v == null || v.isEmpty()) {
-        v = System.getProperty("keycloak." + prefix + key, defaultValue);
+        v = System.getProperty("keycloak." + fullKey);
       }
       return v != null && !v.isEmpty() ? v : null;
+    }
+
+    @Override
+    public String get(String key, String defaultValue) {
+      String v = get(key);
+      return v != null ? v : defaultValue;
     }
 
     @Override
@@ -146,12 +150,18 @@ public class Config implements ConfigProvider {
     return getConfig().get(spiName + ".provider");
   }
 
+  @Override
+  public String getDefaultProvider(String spiName) {
+    return getConfig().get(spiName + ".provider.default");
+  }
+
   public Map<String, String> getConfig() {
     return useGlobalConfigurationFunc.getAsBoolean() ? defaultProperties : properties.get();
   }
 
   private String replaceProperties(String value) {
-    return StringPropertyReplacer.replaceProperties(value, systemProperties);
+    return StringPropertyReplacer.replaceProperties(
+        value, SystemEnvProperties.UNFILTERED::getProperty);
   }
 
   @Override
